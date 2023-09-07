@@ -1,53 +1,33 @@
-const SatelliteForm = () => {
+import React, { useState } from "react";
 
-    const [stateSatellite, setStateSatellite] = useState(   
-        {
-            name: "",
-            latitude: 0,
-            longitude: 0,
-            altitude: 0,
-            visibility: "",
-            footprint: 0,
-            timestamp: 0,
-            solar_lat: 0,
-            solar_lon: 0,
-        }
-    )
-
-    const handleChange = (event) => {      
-        let propertyName = event.target.name;
-        let copiedSatellite = {...stateSatellite};
-        copiedSatellite[propertyName] = event.target.value;
-        setStateSatellite(copiedSatellite)
-    }
-
+const SatelliteForm = ({ satellites, onFormSubmit }) => {
     const handleFormSubmit = (event) => {
-        event.preventDefault();
-    }
-
-    const satelliteOptions = satellites.map((satellite) => {
-        return <option key={satellite.id} value={satellite.id}> {satellite.name} </option>
-    })
-
+      event.preventDefault();
+      const selectedSatelliteId = event.target.satellite.value;
+      onFormSubmit(selectedSatelliteId);
+    };
+  
+    const satelliteOptions = satellites.map((satellite) => (
+      <option key={satellite.id} value={satellite.id}>
+        {satellite.name}
+      </option>
+    ));
+  
     return (
-        <form onSubmit={handleFormSubmit}>
-            <h3>Choose a satellite!</h3>
-            
-            <label htmlFor="satellite">Satellite</label>
-            <select 
-                id="satellite" 
-                name="id"
-                defaultValue="select-satellite"
-                onChange={handleChange}
-            >
-                <option disabled-value="select-satellite">Select a satellite</option>
-                {satelliteOptions}
-            </select>
-            
-            <input type="submit" value="Add Satellite"/>    
-        </form>
+      <form onSubmit={handleFormSubmit}>
+        <h3>Choose a satellite!</h3>
+        <label htmlFor="satellite">Satellite</label>
+        <select id="satellite" name="satellite">
+          <option value="select-satellite" disabled>
+            Select a satellite
+          </option>
+          {satelliteOptions}
+        </select>
+        <input type="submit" value="Add Satellite" />
+      </form>
     );
-
-}
-
-export default SatelliteForm;
+  };
+  
+  export default SatelliteForm;
+  
+  
