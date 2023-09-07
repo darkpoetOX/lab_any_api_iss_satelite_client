@@ -21,6 +21,14 @@ const SatelliteForm = () => {
         setStateSatellite(copiedSatellite)
     }
 
+    const handleFormSubmit = (event) => {
+        event.preventDefault();
+    }
+
+    const satelliteOptions = satellites.map((satellite) => {
+        return <option key={satellite.id} value={satellite.id}> {satellite.name} </option>
+    })
+
     return (
         <form onSubmit={handleFormSubmit}>
             <h3>Choose a satellite!</h3>

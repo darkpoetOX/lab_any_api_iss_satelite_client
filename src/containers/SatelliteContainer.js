@@ -19,7 +19,7 @@ const SatelliteContainer = () => {
         <>
             <h1>ISS Satellite Tracker</h1>
             <p>a resource for tracking satellites</p>
-            <SatelliteForm />
+            <SatelliteForm satellites={satellites}/>
             <SatelliteList satellites={satellites}/>
         </>
     );
