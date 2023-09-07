@@ -1,10 +1,11 @@
 import './App.css';
+import SatelliteContainer from './containers/SatelliteContainer';
 
 function App() {
   return (
-    <div className="App">
-
-    </div>
+    <>
+      <SatelliteContainer />
+    </>
   );
 }
 
