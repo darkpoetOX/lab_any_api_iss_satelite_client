@@ -26,7 +26,7 @@ const SatelliteContainer = () => {
       );
       const data = await response.json();
 
-      // Update the state using the satellite ID as the key
+      // for some reason, setSatellitesById(data) just returns just the placeholders in the return function and no values; had to use the below
       setSatellitesById((prevSatellitesById) => ({
         ...prevSatellitesById,
         [id]: data,
