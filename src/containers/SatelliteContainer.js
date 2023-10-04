@@ -1,72 +1,145 @@
 import { useEffect, useState } from "react";
-import SatelliteForm from "../components/SatelliteForm";
-import SatelliteList from "../components/SatelliteList";
 
 const SatelliteContainer = () => {
-    const [satellites, setSatellites] = useState([]);
-    const [selectedSatellite, setSelectedSatellite] = useState('');
-    const [satellitePositions, setSatellitePositions] = useState({});
-    const [timestamps, setTimestamps] = useState([]);
-    const [units, setUnits] = useState('');
-  
-    const fetchSatellites = async () => {
+  const [satellites, setSatellites] = useState([]);
+  const [satellitesById, setSatellitesById] = useState({});
+  const [positions, setPositions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchSatellites = async () => {
+    try {
       const response = await fetch("https://api.wheretheiss.at/v1/satellites");
       const data = await response.json();
-      setSatellites(data);
-    };
-  
-    const fetchSelectedSatellite = async (satelliteId) => {
-      const response = await fetch("https://api.wheretheiss.at/v1/satellites/" + satelliteId);
-      const data = await response.json();
-      setSelectedSatellite(data);
-    };
-  
-    const fetchSatellitePositions = async (satelliteId, timestamps, units) => {
-        if (timestamps && timestamps.length > 0 && units) {
-          const timestampString = timestamps.join(",");
-          const response = await fetch(`https://api.wheretheiss.at/v1/satellites/${satelliteId}/positions?timestamps=${timestampString}&units=${units}`);
-          const data = await response.json();
-          setSatellitePositions(data);
-        } else {
-          console.error("Timestamps or units are empty.");
-        }
-    };
 
-    const onShowPositionClick = async (satelliteId) => {
-      if (timestamps.length > 0 && units) {
-        await fetchSatellitePositions(satelliteId, timestamps, units);
-      } else {
-        console.error("Timestamps or units are empty.");
-      }
-    };
-  
-    useEffect(() => {                  
-      fetchSatellites();
-      fetchSelectedSatellite();
-      fetchSatellitePositions();
-    }, []);
-  
-    const handleSatelliteFormSubmit = (selectedSatelliteId) => {
-      setSelectedSatellite(selectedSatelliteId);
-    };
-  
-    return (
-      <>
-        <h1>ISS Satellite Tracker</h1>
-        <p>A resource for tracking satellites</p>
-        <SatelliteForm satellites={satellites} onFormSubmit={handleSatelliteFormSubmit} />
-        {satellites ? (
-          <SatelliteList 
-            satellites={satellites} 
-            selectedSatellite={selectedSatellite}
-            satellitePositions={satellitePositions}
-            onShowPositionClick={onShowPositionClick}
-          />
-        ) : (
-          <p>Loading satellite positions...</p>
-        )}
-      </>
-    );
+      setSatellites(data);
+      setLoading(false);
+    } catch (error) {
+      console.error("Network error occurred", error);
+      setLoading(false);
+    }
   };
-  
-  export default SatelliteContainer;
+
+  const fetchSatellitesById = async (id) => {
+    try {
+      const response = await fetch(
+        `https://api.wheretheiss.at/v1/satellites/${id}`
+      );
+      const data = await response.json();
+
+      // Update the state using the satellite ID as the key
+      setSatellitesById((prevSatellitesById) => ({
+        ...prevSatellitesById,
+        [id]: data,
+      }));
+    } catch (error) {
+      console.error("Network error occurred", error);
+    }
+  };
+
+  const fetchPositionData = async (id, timestamps) => {
+    try {
+      const response = await fetch(
+        `https://api.wheretheiss.at/v1/satellites/${id}/positions?timestamps=${timestamps.join(
+          ","
+        )}&units=miles`
+      );
+      const data = await response.json();
+
+      setPositions(data);
+    } catch (error) {
+      console.error("Network error occurred", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSatellites();
+  }, []);
+
+  useEffect(() => {
+    // Define the satellite ID(s) you want to fetch
+    const satelliteIds = [25544]; // Replace with desired satellite IDs
+
+    // Fetch data for each satellite by ID
+    satelliteIds.forEach((id) => {
+      fetchSatellitesById(id);
+    });
+
+    // Fetch position data for a specific satellite and timestamps
+    const specificSatelliteId = 25544; // Replace with the desired satellite ID
+    const specificTimestamps = [1436029893, 1436029907]; // Replace with the desired timestamps
+    fetchPositionData(specificSatelliteId, specificTimestamps);
+  }, []);
+
+  return (
+    <>
+      <h1>Satellite Data</h1>
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <ul>
+          {satellites.map((satellite) => (
+            <li key={satellite.id}>
+              Name: {satellite.name}, ID: {satellite.id}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <h1>Satellite by ID</h1>
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <ul>
+          {Object.keys(satellitesById).map((id) => (
+            <li key={id}>
+              ID: {satellitesById[id].id}
+              <br />
+              Name: {satellitesById[id].name}
+              <br />
+              Latitude: {satellitesById[id].latitude}
+              <br />
+              Longitude: {satellitesById[id].longitude}
+              <br />
+              Altitude: {satellitesById[id].altitude}
+              <br />
+              Velocity: {satellitesById[id].velocity}
+              <br />
+              Visibility: {satellitesById[id].visibility}
+              <br />
+              Footprint: {satellitesById[id].footprint}
+              <br />
+              Solar Latitude: {satellitesById[id].solar_lat}
+              <br />
+              Solar Longitude: {satellitesById[id].solar_lon}
+              <br />
+              Units: {satellitesById[id].units}
+              <br />
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <h1>Position Data</h1>
+      <ul>
+        {positions.map((position, index) => (
+          <li key={index}>
+            Timestamp: {position.timestamp}
+            <br />
+            Latitude: {position.latitude}
+            <br />
+            Longitude: {position.longitude}
+            <br />
+            Solar Latitude: {position.solar_lat}
+            <br />
+            Solar Longitude:: {position.solar_lon}
+            <br />
+            Units: {position.units}
+            <br />
+          </li>
+        ))}
+      </ul>
+    </>
+  );
+};
+
+export default SatelliteContainer;
